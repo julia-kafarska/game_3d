@@ -4,9 +4,15 @@ import * as THREE from "three";
 import { ITerrain } from "../Interfaces/Terrain.ts";
 import { TextureLoader, Vector3 } from "three";
 import { useState } from "react";
+import { useBox, usePlane } from "@react-three/cannon";
 
 const initVector = new Vector3(0, 100, 0);
 const Terrain = ({ onLeftClick }: ITerrain) => {
+  const [ref] = usePlane(() => ({
+    type: "Static",
+    position: [0, -0.5, 0],
+    rotation: [Math.PI * -0.5, 0, 0],
+  }));
   const [hovered, setHover] = useState<Vector3>(initVector);
   const [colorMap, normalMap, roughnessMap] = useLoader(TextureLoader, [
     "../../textures/pavingStones/PavingStones139_1K-JPG/PavingStones139_1K-JPG_Color.jpg",
@@ -29,8 +35,7 @@ const Terrain = ({ onLeftClick }: ITerrain) => {
         <meshBasicMaterial color={"red"} />
       </mesh>
       <mesh
-        position={[0, -0.5, 0]}
-        rotation-x={Math.PI * -0.5}
+        ref={ref}
         receiveShadow
         onPointerMove={(e) => {
           setHover(

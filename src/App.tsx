@@ -1,7 +1,8 @@
 import { Canvas } from "@react-three/fiber";
 import Scene from "./Scene/Scene.tsx";
 import { Leva } from "leva";
-import {} from "@react-three/drei";
+import AxisHelper from "./Helpers/AxisHelper.tsx";
+import { Physics } from "@react-three/cannon";
 function App() {
   return (
     <>
@@ -13,7 +14,10 @@ function App() {
           antialias: true,
         }}
       >
-        <Scene />
+        <AxisHelper />
+        <Physics>
+          <Scene />
+        </Physics>
       </Canvas>
     </>
   );

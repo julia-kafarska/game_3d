@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { useRef, useState } from "react";
 
 import Weather from "../Weather/Weather.tsx";
 import Sun from "../Lights/Sun/Sun.tsx";
@@ -7,6 +6,9 @@ import Terrain from "../Terrain/Terrain.tsx";
 import Block from "../Block/Block.tsx";
 import { ILeftClickParams } from "../Interfaces/Terrain.ts";
 import { IObject } from "../Interfaces/Object.ts";
+import CameraControls from "../Camera/Camera.tsx";
+import MockPlayer from "../MockPlayer/Player.tsx";
+import { axisMapping, useGamepad } from "../gameControllers/padHook.ts";
 
 const Scene = () => {
   const [objects, setObjects] = useState<IObject[]>([
@@ -23,6 +25,8 @@ const Scene = () => {
       },
     },
   ]);
+
+  const gamepad = useGamepad();
 
   const handleLeftClick = (params: ILeftClickParams) => {
     // TODO check if block exists in this position
@@ -55,18 +59,10 @@ const Scene = () => {
           onLeftClick={handleLeftClick}
         />
       ))}
+      <MockPlayer position={[0, 1, 0]} gamepad={gamepad} />
+
       {/*<Flame />*/}
       {/*<Player />*/}
-      {/*<Suspense fallback={<Loader />}>*/}
-      {/*  <Model url="../../models/fire/scene.gltf" position={[3, 0, 10]} />*/}
-      {/*</Suspense>*/}
-      <PerspectiveCamera position={[12, 12, 12]} makeDefault />
-      <OrbitControls
-        minDistance={5}
-        maxDistance={70}
-        minPolarAngle={0}
-        maxPolarAngle={1}
-      />
     </>
   );
 };

@@ -1,7 +1,7 @@
 import { memo, useMemo, useState } from "react";
 import { ITerrainBlock } from "../Interfaces/Terrain.ts";
 import { ThreeEvent } from "@react-three/fiber";
-import * as THREE from "three";
+import { useBox } from "@react-three/cannon";
 
 const Block = ({
   position,
@@ -9,13 +9,18 @@ const Block = ({
   onLeftClick,
 }: ITerrainBlock) => {
   const [active, setActive] = useState<boolean>(false);
+  const [ref] = useBox(() => ({
+    type: "Kinematic",
+    mass: 1,
+    position: [position.x, position.y, position.z],
+    rotation: [-Math.PI / 2, 0, 0],
+  }));
 
   return (
     <mesh
-      rotation={[-Math.PI / 2, 0, 0]}
+      ref={ref}
       receiveShadow={position.y > 0}
       castShadow
-      position={[position.x, position.y, position.z]}
       onPointerEnter={(e) => {
         e.stopPropagation();
         setActive(true);
