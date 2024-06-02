@@ -6,7 +6,7 @@ import { TextureLoader, Vector3 } from "three";
 import { useState } from "react";
 import { useBox, usePlane } from "@react-three/cannon";
 
-const initVector = new Vector3(0, 100, 0);
+const initVector = new Vector3(0, Infinity, 0);
 const Terrain = ({ onLeftClick }: ITerrain) => {
   const [ref] = usePlane(() => ({
     type: "Static",
@@ -30,7 +30,7 @@ const Terrain = ({ onLeftClick }: ITerrain) => {
 
   return (
     <>
-      <mesh position={hovered}>
+      <mesh position={hovered} visible={hovered.y !== Infinity}>
         <boxGeometry attach="geometry" args={[1, 0.1, 1]} />
         <meshBasicMaterial color={"red"} />
       </mesh>

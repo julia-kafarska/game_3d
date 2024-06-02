@@ -6,7 +6,7 @@ const FlameLight = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIntensity(2.8 + Math.random() * 2.4); // Flicker between 0.8 and 1.2
+      setIntensity(12.8 + Math.random() * 2.4); // Flicker between 0.8 and 1.2
       setColor(
         `rgb(
           ${Math.floor(200 + Math.random() * 55)},

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import Weather from "../Weather/Weather.tsx";
 import Sun from "../Lights/Sun/Sun.tsx";
@@ -8,6 +8,8 @@ import { ILeftClickParams } from "../Interfaces/Terrain.ts";
 import { IObject } from "../Interfaces/Object.ts";
 import MockPlayer from "../MockPlayer/Player.tsx";
 import { useGamepad } from "../gameControllers/padHook.ts";
+// import Castle from "../Castle/Castle.tsx";
+import FlameLight from "../Lights/Flame/Flame.tsx";
 
 const Scene = () => {
   const [objects, setObjects] = useState<IObject[]>([
@@ -50,6 +52,8 @@ const Scene = () => {
     <>
       <Weather />
       <Sun />
+      {/*<Castle />*/}
+      <FlameLight />
       <Terrain onLeftClick={handleLeftClick} />
       {objects.map((object: IObject) => (
         <Block

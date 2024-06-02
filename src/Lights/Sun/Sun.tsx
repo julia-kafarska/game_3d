@@ -1,6 +1,5 @@
 import { a, useSpring } from "@react-spring/three";
 import { useControls } from "leva";
-// import Flame from "../Flame/Flame.tsx";
 
 const Sun = () => {
   const { dayNight } = useControls({
@@ -8,7 +7,7 @@ const Sun = () => {
   });
 
   const { intensity } = useSpring({
-    intensity: dayNight ? 0.2 : 1,
+    intensity: dayNight ? 0.1 : 1,
     config: {
       duration: 2000,
       easing: (t) => t * (2 - t),
@@ -20,7 +19,6 @@ const Sun = () => {
     <>
       <a.ambientLight intensity={intensity} />
       <a.directionalLight position={[0, 10, 0]} intensity={intensity} />
-      {/*<Flame />*/}
       <a.pointLight
         castShadow
         position={[0, 3, 1]}

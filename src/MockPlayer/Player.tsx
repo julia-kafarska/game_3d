@@ -1,17 +1,20 @@
 import { useFrame, useThree } from "@react-three/fiber";
-import { Text, useCamera } from "@react-three/drei";
-import { MutableRef3dObject } from "../Interfaces/Player.ts";
 import { useRef, useState } from "react";
 import { useBox } from "@react-three/cannon";
 import CameraControls from "../Camera/Camera.tsx";
 import * as THREE from "three";
+import { Html } from "@react-three/drei";
 
 import { axisMapping, buttonMapping } from "../gameControllers/padHook.ts";
 let movementSpeed = 0.1;
+
 const MockPlayer = ({ position, gamepad }) => {
   const angleRef = useRef(0); //
   const angleRef2 = useRef(3); //
-  const coordinates = useRef<MutableRef3dObject>();
+  const [coord, setCoord] = useState({
+    position: { x: 0, y: 0, z: 0 },
+    rotation: { x: 0, y: 0, z: 0 },
+  });
   const [ref, api] = useBox(() => ({
     type: "Kinematic",
     mass: 1,
@@ -58,6 +61,14 @@ const MockPlayer = ({ position, gamepad }) => {
         currentRotation.y += rX * rotationSpeed;
       }
 
+      setCoord({
+        position: {
+          ...currentPosition,
+          y: currentPosition.y + 2,
+        },
+        rotation: currentRotation,
+      });
+
       api.position.set(currentPosition.x, currentPosition.y, currentPosition.z);
       api.rotation.set(currentRotation.x, currentRotation.y, currentRotation.z);
     }
@@ -65,10 +76,26 @@ const MockPlayer = ({ position, gamepad }) => {
 
   return (
     <>
-      <Text fontSize={1} color="green" ref={coordinates} position={[1, 2, 1]}>
-        x:{position.x ? Math.round(position.x) : "-"}
-        z:{position.z ? Math.round(position.z) : "-"}
-      </Text>
+      <Html>
+        <div
+          style={{
+            background: "rgba(255,0,0, 0.2)",
+            width: "100px",
+            height: "30px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            color: "white",
+          }}
+        >
+          {coord.position.x !== null
+            ? `x: ${Math.round(coord.position.x)} `
+            : null}
+          {coord.position.z !== null
+            ? `z: ${Math.round(coord.position.z)}`
+            : null}
+        </div>
+      </Html>
       <mesh ref={ref}>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color="orange" />

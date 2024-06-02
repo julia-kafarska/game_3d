@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useState } from "react";
 import { ITerrainBlock } from "../Interfaces/Terrain.ts";
 import { ThreeEvent } from "@react-three/fiber";
 import { useBox } from "@react-three/cannon";
