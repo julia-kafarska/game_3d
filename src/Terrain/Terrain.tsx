@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useBox, usePlane } from "@react-three/cannon";
 
 const initVector = new Vector3(0, Infinity, 0);
+
 const Terrain = ({ onLeftClick }: ITerrain) => {
   const [ref] = usePlane(() => ({
     type: "Static",
@@ -55,7 +56,7 @@ const Terrain = ({ onLeftClick }: ITerrain) => {
           setHover(initVector);
         }}
       >
-        <planeGeometry args={[250, 250]} />
+        <planeGeometry args={[100, 100]} />
         <meshStandardMaterial
           map={colorMap}
           normalMap={normalMap}

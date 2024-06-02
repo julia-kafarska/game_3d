@@ -10,6 +10,7 @@ import MockPlayer from "../MockPlayer/Player.tsx";
 import { useGamepad } from "../gameControllers/padHook.ts";
 // import Castle from "../Castle/Castle.tsx";
 import FlameLight from "../Lights/Flame/Flame.tsx";
+import PreGenerated from "../PreGenerated/PreGenerated.tsx";
 
 const Scene = () => {
   const [objects, setObjects] = useState<IObject[]>([
@@ -39,11 +40,6 @@ const Scene = () => {
           y: params.y,
           z: params.z,
         },
-        size: {
-          w: 1,
-          h: 1,
-          d: 1,
-        },
       },
     ]);
   };
@@ -62,8 +58,16 @@ const Scene = () => {
           onLeftClick={handleLeftClick}
         />
       ))}
-      <MockPlayer position={[0, 1, 0]} gamepad={gamepad} />
 
+      <PreGenerated
+        position={{
+          x: -2,
+          y: 0,
+          z: 10,
+        }}
+        handleLeftClick={handleLeftClick}
+      />
+      <MockPlayer position={[0, 1, 0]} gamepad={gamepad} />
       {/*<Flame />*/}
       {/*<Player />*/}
     </>

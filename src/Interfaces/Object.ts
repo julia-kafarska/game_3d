@@ -6,11 +6,6 @@ export interface IObject {
     y: number;
     z: number;
   };
-  size: {
-    w: number;
-    h: number;
-    d: number;
-  };
 }
 
 export interface IObjects {
