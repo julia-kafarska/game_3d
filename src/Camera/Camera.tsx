@@ -1,64 +1,58 @@
-import { memo, useRef } from "react";
+import { memo, useEffect } from "react";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import * as THREE from "three";
 import { axisMapping } from "../gameControllers/padHook.ts";
+import * as THREE from "three";
+import { Vector3 } from "three";
 
-const CameraControls = ({ gamepad, playerRef }) => {
+const radiusInit = 10;
+
+const CameraControls = ({ gamepad, playerRef, angleRef, angleRef2 }) => {
   const { camera } = useThree();
-  const angleRef = useRef(0); // Store the current angle for the camera rotation
   useFrame(() => {
     if (gamepad && playerRef.current && playerRef.current) {
       // const lX = gamepad.axes[axisMapping.L_STICK_X];
       // const lY = gamepad.axes[axisMapping.L_STICK_Y];
 
       const rX = gamepad.axes[axisMapping.R_STICK_X];
-      const rY = gamepad.axes[axisMapping.R_STICK_Y];
+      const rY = gamepad.axes[axisMapping.R_STICK_Y]; // left up and down
 
-      const movementSpeed = 0.1;
+      let radius = radiusInit;
       const rotationSpeed = 0.05;
 
       const playerPosition = playerRef.current.position;
 
-      if (Math.abs(rX) > 0.1 || Math.abs(rY) > 0.1) {
-        const forward = new THREE.Vector3(
-          Math.sin(angleRef.current),
-          0,
-          Math.cos(angleRef.current),
-        ).normalize();
-        const right = new THREE.Vector3(
-          Math.sin(angleRef.current + Math.PI / 2),
-          0,
-          Math.cos(angleRef.current + Math.PI / 2),
-        ).normalize();
-        playerRef.current.position.add(
-          forward.multiplyScalar(rY * movementSpeed),
-        );
-        playerRef.current.position.add(
-          right.multiplyScalar(rX * movementSpeed),
-        );
-      }
-
-      // Update the angle for camera rotation if left stick is moved
       if (Math.abs(rX) > 0.1) {
         angleRef.current += rX * rotationSpeed;
       }
+      if (Math.abs(rY) > 0.1) {
+        //* rotationSpeed2
+        const newAngle2 = angleRef2.current + rY;
+        if (newAngle2 >= 3 && newAngle2 < 18) {
+          angleRef2.current = newAngle2;
+        }
+      }
 
       // Calculate the new camera position based on the angle and radius
-      const radius = 10;
       camera.position.x =
         playerPosition.x + radius * Math.sin(angleRef.current);
+      camera.position.y = Math.PI * angleRef2.current;
       camera.position.z =
         playerPosition.z + radius * Math.cos(angleRef.current);
-      camera.position.y = playerPosition.y + 5; // Slightly above the player
-
-      // Make the camera look at the player
       camera.lookAt(playerPosition);
     }
   });
+
+  useEffect(() => {
+    camera.position.x = radiusInit * Math.sin(angleRef.current);
+    camera.position.y = Math.PI * angleRef2.current;
+    camera.position.z = 1 + radiusInit * Math.cos(angleRef.current);
+
+    camera.lookAt(camera.position);
+  }, []);
+
   return (
     <>
-      <PerspectiveCamera position={[12, 12, 12]} />
       <OrbitControls
         enableZoom={true}
         minDistance={5}

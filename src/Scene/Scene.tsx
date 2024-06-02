@@ -6,9 +6,8 @@ import Terrain from "../Terrain/Terrain.tsx";
 import Block from "../Block/Block.tsx";
 import { ILeftClickParams } from "../Interfaces/Terrain.ts";
 import { IObject } from "../Interfaces/Object.ts";
-import CameraControls from "../Camera/Camera.tsx";
 import MockPlayer from "../MockPlayer/Player.tsx";
-import { axisMapping, useGamepad } from "../gameControllers/padHook.ts";
+import { useGamepad } from "../gameControllers/padHook.ts";
 
 const Scene = () => {
   const [objects, setObjects] = useState<IObject[]>([
