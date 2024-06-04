@@ -2,8 +2,16 @@ import { Canvas } from "@react-three/fiber";
 import Scene from "./Scene/Scene.tsx";
 import { Leva } from "leva";
 import AxisHelper from "./Helpers/AxisHelper.tsx";
-import { Physics } from "@react-three/cannon";
+import { Debug, Physics } from "@react-three/cannon";
+import { useControls } from "leva";
+
 function App() {
+  const gravity = useControls("Gravity", {
+    x: { value: 0, min: -10, max: 10, step: 0.1 },
+    y: { value: -9.8, min: -10, max: 10, step: 0.1 },
+    z: { value: 0, min: -10, max: 10, step: 0.1 },
+  });
+
   return (
     <>
       <Leva />
@@ -15,8 +23,10 @@ function App() {
         }}
       >
         <AxisHelper />
-        <Physics>
-          <Scene />
+        <Physics gravity={[gravity.x, gravity.y, gravity.z]}>
+          <Debug>
+            <Scene />
+          </Debug>
         </Physics>
       </Canvas>
     </>

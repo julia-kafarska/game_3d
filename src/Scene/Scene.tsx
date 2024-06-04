@@ -8,10 +8,8 @@ import { ILeftClickParams } from "../Interfaces/Terrain.ts";
 import { IObject } from "../Interfaces/Object.ts";
 import MockPlayer from "../MockPlayer/Player.tsx";
 import { useGamepad } from "../gameControllers/padHook.ts";
-// import Castle from "../Castle/Castle.tsx";
 import FlameLight from "../Lights/Flame/Flame.tsx";
 import PreGenerated from "../PreGenerated/PreGenerated.tsx";
-
 const Scene = () => {
   const [objects, setObjects] = useState<IObject[]>([
     {
@@ -20,13 +18,10 @@ const Scene = () => {
         y: 0,
         z: 0,
       },
-      size: {
-        w: 1,
-        h: 1,
-        d: 1,
-      },
     },
   ]);
+
+  // const { map, addSector } = useMapStore();
 
   const gamepad = useGamepad();
 
@@ -48,9 +43,16 @@ const Scene = () => {
     <>
       <Weather />
       <Sun />
-      {/*<Castle />*/}
       <FlameLight />
-      <Terrain onLeftClick={handleLeftClick} />
+      <Terrain
+        onLeftClick={handleLeftClick}
+        position={{
+          x: 0,
+          y: 0,
+          z: 0,
+        }}
+      />
+
       {objects.map((object: IObject) => (
         <Block
           position={object.position}
@@ -58,7 +60,6 @@ const Scene = () => {
           onLeftClick={handleLeftClick}
         />
       ))}
-
       <PreGenerated
         position={{
           x: -2,
@@ -68,8 +69,6 @@ const Scene = () => {
         handleLeftClick={handleLeftClick}
       />
       <MockPlayer position={[0, 1, 0]} gamepad={gamepad} />
-      {/*<Flame />*/}
-      {/*<Player />*/}
     </>
   );
 };

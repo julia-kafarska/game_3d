@@ -20,12 +20,6 @@ const cas = [
     [1, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1],
   ],
-  [
-    [0, 0, 0, 0, 0, 0],
-    [0, 1, 1, 1, 1, 0],
-    [0, 1, 1, 1, 1, 0],
-    [0, 0, 0, 0, 0, 0],
-  ],
 ];
 const PreGenerated = ({ position, handleLeftClick }) => {
   return cas.map((plane, i) =>

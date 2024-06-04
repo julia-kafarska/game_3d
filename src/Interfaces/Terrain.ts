@@ -3,6 +3,7 @@ import { IBoxSize } from "./Size.ts";
 
 export interface ILeftClickParams extends IPosition {
   action: string;
+  position: IPosition;
 }
 
 export interface ITerrain {

@@ -10,7 +10,7 @@ const Block = ({
 }: ITerrainBlock) => {
   const [active, setActive] = useState<boolean>(false);
   const [ref] = useBox(() => ({
-    type: "Kinematic",
+    type: "Dynamic",
     mass: 1,
     position: [position.x, position.y, position.z],
     rotation: [-Math.PI / 2, 0, 0],
@@ -19,7 +19,7 @@ const Block = ({
   return (
     <mesh
       ref={ref}
-      receiveShadow={position.y > 0}
+      receiveShadow
       castShadow
       onPointerEnter={(e) => {
         e.stopPropagation();

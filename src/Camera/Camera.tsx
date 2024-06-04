@@ -1,9 +1,7 @@
 import { memo, useEffect } from "react";
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { OrbitControls, OrbitControlsasdw } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { axisMapping } from "../gameControllers/padHook.ts";
-import * as THREE from "three";
-import { Vector3 } from "three";
 
 const radiusInit = 10;
 
