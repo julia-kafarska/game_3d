@@ -18,7 +18,6 @@ const MockPlayer = ({ position, gamepad }) => {
   const angleRef2 = useRef(3); //
   const [coord, setCoord] = useState({
     position: { x: 0, y: 0, z: 0 },
-    rotation: { x: 0, y: 0, z: 0 },
   });
   const [modelX, setModelX] = useState(null);
   const [mixer, setMixer] = useState(null);
@@ -51,10 +50,10 @@ const MockPlayer = ({ position, gamepad }) => {
 
   useFrame(() => {
     if (mixer && gamepad) {
-      const lX = gamepad.axes[axisMapping.L_STICK_X];
+      const rX = gamepad.axes[axisMapping.L_STICK_X];
       const lY = gamepad.axes[axisMapping.L_STICK_Y];
-      const rX = gamepad.axes[axisMapping.R_STICK_X];
-      const rPress = gamepad.buttons[buttonMapping.L_STICK];
+      // const rX = gamepad.axes[axisMapping.R_STICK_X];
+      const leftStickPress = gamepad.buttons[buttonMapping.L_STICK];
       //
       // if (Math.abs(lX) <= 0.1 || Math.abs(rX) <= 0.1) {
       //   changeAction(mixer._actions[0]);
@@ -64,41 +63,36 @@ const MockPlayer = ({ position, gamepad }) => {
 
       // Get current position and rotation
       const currentPosition = ref.current.position;
-      const currentRotation = ref.current.rotation;
 
-      // // Calculate new position
-      const forward = new THREE.Vector3(0, 0, 1);
-      forward.applyQuaternion(ref.current.quaternion); // Apply current rotation
-      forward.normalize();
+      ref.current.rotation.y = angleRef.current + Math.PI;
 
-      const right = new THREE.Vector3(1, 0, 0);
-      right.applyQuaternion(ref.current.quaternion); // Apply current rotation
-      right.normalize();
-
-      if (Math.abs(lX) > 0.1) {
-        currentPosition.add(right.multiplyScalar(lX * movementSpeed));
-        if (rPress.pressed) {
-          movementSpeed = 0.3;
+      if (Math.abs(lY) > 0.1) {
+        if (leftStickPress.pressed) {
+          movementSpeed = 0.09;
           changeAction(mixer._actions[2]);
         } else {
-          movementSpeed = 0.06;
+          movementSpeed = 0.03;
           changeAction(mixer._actions[1]);
         }
-      }
-      if (Math.abs(lY) > 0.1) {
+        // // Calculate new position
+        const forward = new THREE.Vector3(0, 0, -1);
+        forward.applyQuaternion(ref.current.quaternion); // Apply current rotation
+        forward.normalize();
+
         currentPosition.add(forward.multiplyScalar(lY * movementSpeed));
+      } else {
+        changeAction(mixer._actions[0]);
       }
       // Rotate the box based on the right stick's x-axis
-      if (Math.abs(rX) > 0.1) {
-        currentRotation.y += rX * rotationSpeed;
-      }
+      // if (Math.abs(rX) > 0.1) {
+      //   currentRotation.y += rX * rotationSpeed;
+      // }
 
       setCoord({
         position: {
           ...currentPosition,
           y: currentPosition.y + 2,
         },
-        rotation: currentRotation,
       });
 
       mixer.update(0.016); // Update the mixer with a fixed time step

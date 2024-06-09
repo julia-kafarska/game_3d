@@ -9,9 +9,6 @@ const CameraControls = ({ gamepad, playerRef, angleRef, angleRef2 }) => {
   const { camera } = useThree();
   useFrame(() => {
     if (gamepad && playerRef.current && playerRef.current) {
-      // const lX = gamepad.axes[axisMapping.L_STICK_X];
-      // const lY = gamepad.axes[axisMapping.L_STICK_Y];
-
       const rX = gamepad.axes[axisMapping.R_STICK_X];
       const rY = gamepad.axes[axisMapping.R_STICK_Y]; // left up and down
 
