@@ -21,7 +21,6 @@ const CameraControls = ({ gamepad, playerRef, angleRef, angleRef2 }) => {
         angleRef.current += rX * rotationSpeed;
       }
       if (Math.abs(rY) > 0.1) {
-        //* rotationSpeed2
         const newAngle2 = angleRef2.current + rY;
         if (newAngle2 >= 3 && newAngle2 < 18) {
           angleRef2.current = newAngle2;
@@ -34,7 +33,7 @@ const CameraControls = ({ gamepad, playerRef, angleRef, angleRef2 }) => {
       camera.position.y = Math.PI * angleRef2.current;
       camera.position.z =
         playerPosition.z + radius * Math.cos(angleRef.current);
-      camera.lookAt(playerPosition);
+      camera.lookAt(playerPosition.x, 1, playerPosition.z);
     }
   });
 
