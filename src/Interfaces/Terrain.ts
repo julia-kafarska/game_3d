@@ -2,13 +2,14 @@ import { IPosition } from "./Position.ts";
 import { IBoxSize } from "./Size.ts";
 
 export interface ILeftClickParams extends IPosition {
-  action: string;
   position: IPosition;
+  action: string;
 }
 
 export interface ITerrain {
   onLeftClick: (params: ILeftClickParams) => void;
-  position?: { x: number; y: number; z: number };
+  setHover: any;
+  hovered: any;
 }
 
 export interface ITerrainBlock {
@@ -17,7 +18,7 @@ export interface ITerrainBlock {
   onLeftClick: (params: {
     x: number;
     y: number;
-    action: string;
     z: number;
+    action: string;
   }) => void;
 }

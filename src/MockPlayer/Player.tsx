@@ -1,32 +1,26 @@
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import { useBox } from "@react-three/cannon";
 import CameraControls from "../Camera/Camera.tsx";
 import * as THREE from "three";
 import { Html } from "@react-three/drei";
 
-import {
-  axisMapping,
-  buttonMapping,
-  useGamepad,
-} from "../gameControllers/padHook.ts";
+import { axisMapping, buttonMapping, useGamepad } from "../store/gamePad.ts";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { mix } from "three/examples/jsm/nodes/math/MathNode";
-let movementSpeed = 0.02;
+import { usePlayerContext } from "../store/player.tsx";
 
-const rotationSpeed = 0.05;
-const MockPlayer = ({ position }) => {
+let movementSpeed = 0.015;
+const MockPlayer = () => {
+  const { player, updatePlayer } = usePlayerContext();
   const gamepad = useGamepad();
-  const [ref, api] = useBox(() => ({
+  const [ref] = useBox(() => ({
     mass: 1,
-    position,
+    position: [player.position.x, player.position.y, player.position.z],
   }));
 
   const angleRef = useRef(0); //
   const angleRef2 = useRef(3); //
-  const [coord, setCoord] = useState({
-    position,
-  });
   const [modelX, setModelX] = useState(null);
   const [mixer, setMixer] = useState<THREE.AnimationMixer | null>(null);
   const [currentAction, setCurrentAction] = useState(null);
@@ -37,9 +31,11 @@ const MockPlayer = ({ position }) => {
       "../../models/Xbot.glb",
       (gltf: { scene: any; animations: THREE.AnimationClip[] }) => {
         const model = gltf.scene;
-        model.position.x = position[0]; // 0;
-        model.position.y = position[1]; // -0.5;
-        model.position.z = position[2]; // 0;
+        model.position.x = player.position.x;
+        model.position.y = player.position.y;
+        model.position.z = player.position.z;
+        model.rotation.y = Math.PI;
+
         model.traverse(function (node: {
           isMesh: any;
           castShadow: boolean;
@@ -80,38 +76,33 @@ const MockPlayer = ({ position }) => {
 
       // Get current position and rotation
       const currentPosition = ref.current.position;
+      const currentRotation = ref.current.rotation;
 
       ref.current.rotation.y = angleRef.current + Math.PI;
 
+      if (leftStickPress.pressed) {
+        movementSpeed = 0.04;
+      } else {
+        movementSpeed = 0.015;
+      }
       if (Math.abs(rX) > 0.05) {
-        if (leftStickPress.pressed) {
-          movementSpeed = 0.09;
-        }
-
-        let moveZ = -1;
-        // Calculate new position
-        const move = new THREE.Vector3(0, 0, moveZ);
-        move.applyQuaternion(ref.current.quaternion); // Apply current rotation
+        const move = new THREE.Vector3(0, 0, -1);
+        move.applyQuaternion(ref.current.quaternion);
         move.normalize();
 
-        currentPosition.add(move.multiplyScalar(lY * movementSpeed));
+        currentPosition.add(
+          move.multiplyScalar(Math.round(lY) * movementSpeed),
+        );
+
+        updatePlayer({
+          position: {
+            x: currentPosition.x,
+            y: currentPosition.y,
+            z: currentPosition.z,
+          },
+        });
       }
-      // Rotate the box based on the right stick's x-axis
-      // if (Math.abs(rX) > 0.1) {
-      //   currentRotation.y += rX * rotationSpeed;
-      // }
-
-      setCoord({
-        position: {
-          ...currentPosition,
-          y: currentPosition.y + 2,
-        },
-      });
-
       mixer.update(0.016); // Update the mixer with a fixed time step
-
-      // api.position.set(currentPosition.x, currentPosition.y, currentPosition.z);
-      // api.rotation.set(currentRotation.x, currentRotation.y, currentRotation.z);
     }
   });
 
@@ -132,20 +123,20 @@ const MockPlayer = ({ position }) => {
     }
   }, [gamepad]);
 
-  const changeAction = (toAction) => {
+  const changeAction = (toAction: SetStateAction<null>) => {
     if (toAction !== currentAction) {
-      currentAction?.fadeOut(0.1);
-      toAction.reset().fadeIn(0.1).play();
+      currentAction?.fadeOut(0.2);
+      toAction.reset().fadeIn(0.2).play();
       setCurrentAction(toAction);
     }
   };
 
   useEffect(() => {
-    const a = Math.abs(coord.position.x) >= 5;
-    const b = Math.abs(coord.position.z) >= 5;
+    const a = Math.abs(player.position.x) >= 5;
+    const b = Math.abs(player.position.z) >= 5;
     if (a || b) {
     }
-  }, [coord.position.x, coord.position.z]);
+  }, [player.position.x, player.position.z]);
 
   return (
     <>
@@ -161,11 +152,11 @@ const MockPlayer = ({ position }) => {
             color: "white",
           }}
         >
-          {coord.position.x !== null
-            ? `x: ${Math.round(coord.position.x)} `
+          {player.position.x !== null
+            ? `x: ${Math.round(player.position.x)} `
             : null}
-          {coord.position.z !== null
-            ? `z: ${Math.round(coord.position.z)}`
+          {player.position.z !== null
+            ? `z: ${Math.round(player.position.z)}`
             : null}
         </div>
       </Html>
@@ -175,7 +166,6 @@ const MockPlayer = ({ position }) => {
         </mesh>
       )}
       <CameraControls
-        playerRef={ref}
         gamepad={gamepad}
         angleRef={angleRef}
         angleRef2={angleRef2}

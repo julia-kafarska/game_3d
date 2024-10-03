@@ -14,7 +14,6 @@ const Sun = () => {
     }, // 1-second duration with an ease-out effect
   });
 
-  // setV(Math.random());
   return (
     <>
       <a.ambientLight intensity={intensity} />

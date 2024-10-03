@@ -17,9 +17,11 @@ function App() {
       <Leva />
       <Canvas
         shadows
+        camera={{ position: [0, 5, 10], near: 0.1, far: 10000 }}
         style={{ height: "100vh", width: "100vw" }}
         gl={{
           antialias: true,
+          logarithmicDepthBuffer: true,
         }}
       >
         <AxisHelper />

@@ -28,9 +28,9 @@ const PreGenerated = ({ position, handleLeftClick }) => {
         col === 1 ? (
           <Block
             position={{
-              z: j + position.z,
-              y: i + position.y,
-              x: k + position.x,
+              z: j - position.z,
+              y: i - position.y,
+              x: k - position.x,
             }}
             key={`${i}${j}${k}`}
             onLeftClick={handleLeftClick}

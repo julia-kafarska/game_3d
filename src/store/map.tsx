@@ -1,19 +1,20 @@
 import { createContext, useContext, useReducer, ReactNode } from "react";
+import { sectorSize } from "../const/settings.ts";
 
 // Define the initial state
 const initialState = {
-  map: {
-    "0x0": {
-      neighbours: [
-        "0x10",
-        "-10x10",
-        "10x0",
-        "0x-10",
-        "10x-10",
-        "-10x-10",
-        "-10x0",
-      ],
-    },
+  "0x0": {
+    // heres the problem !!!!!!
+    neighbours: [
+      `${sectorSize}x${sectorSize}`, // Top-right
+      `0x${sectorSize}`, // Above
+      `-${sectorSize}x${sectorSize}`, // Top-left
+      `${sectorSize}x0`, // Right
+      `-${sectorSize}x0`, // Left
+      `${sectorSize}x-${sectorSize}`, // Bottom-right
+      `0x-${sectorSize}`, // Below
+      `-${sectorSize}x-${sectorSize}`, // Bottom-left
+    ],
   },
 };
 
@@ -26,10 +27,7 @@ const mapReducer = (state: any, action: any) => {
     case ADD_SECTOR:
       return {
         ...state,
-        map: {
-          ...state.map,
-          [action.payload]: {}, // Add the new sector to the map
-        },
+        [action.payload]: {}, // Add the new sector to the map
       };
     default:
       return state;
@@ -43,17 +41,8 @@ const MapContext = createContext<any>(null);
 export const MapProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(mapReducer, initialState);
 
-  // Function to add a new sector
-  const addSector = (coord: string) => {
-    dispatch({ type: ADD_SECTOR, payload: coord });
-  };
-  // Function to add a new sector
-  const getSector = (coord: string) => state.map[coord];
-
   return (
-    <MapContext.Provider value={{ map: state.map, addSector, getSector }}>
-      {children}
-    </MapContext.Provider>
+    <MapContext.Provider value={{ map: state }}>{children}</MapContext.Provider>
   );
 };
 
