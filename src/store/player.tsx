@@ -3,7 +3,7 @@ import { createContext, useContext, useReducer, ReactNode } from "react";
 const initialState = {
   position: {
     x: 0,
-    y: -0.5,
+    y: 0,
     z: 0,
   },
   rotation: 0,

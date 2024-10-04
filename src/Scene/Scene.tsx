@@ -46,6 +46,7 @@ const Scene = () => {
         {/*<Weather />*/}
         <Sun />
         {/*<FlameLight />*/}
+        <MockPlayer />
         <Terrain onLeftClick={handleLeftClick} />
 
         {/*{objects.map((object: IObject) => (*/}
@@ -65,8 +66,6 @@ const Scene = () => {
         {/*  }}*/}
         {/*  handleLeftClick={handleLeftClick}*/}
         {/*/>*/}
-
-        <MockPlayer />
       </PlayerProvider>
     </MapProvider>
   );

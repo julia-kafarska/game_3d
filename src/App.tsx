@@ -4,6 +4,7 @@ import { Leva } from "leva";
 import AxisHelper from "./Helpers/AxisHelper.tsx";
 import { Debug, Physics } from "@react-three/cannon";
 import { useControls } from "leva";
+import { OrbitControls } from "@react-three/drei";
 
 function App() {
   const gravity = useControls("Gravity", {
@@ -30,6 +31,13 @@ function App() {
             <Scene />
           </Debug>
         </Physics>
+        <OrbitControls
+          enableZoom={true}
+          minDistance={5}
+          maxDistance={70}
+          minPolarAngle={0}
+          maxPolarAngle={1}
+        />
       </Canvas>
     </>
   );

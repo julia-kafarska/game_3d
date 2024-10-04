@@ -7,10 +7,10 @@ import { Html } from "@react-three/drei";
 
 import { axisMapping, buttonMapping, useGamepad } from "../store/gamePad.ts";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { mix } from "three/examples/jsm/nodes/math/MathNode";
+// import { mix } from "three/examples/jsm/nodes/math/MathNode";
 import { usePlayerContext } from "../store/player.tsx";
 
-let movementSpeed = 0.015;
+const movementSpeed = 0.015;
 const MockPlayer = () => {
   const { player, updatePlayer } = usePlayerContext();
   const gamepad = useGamepad();
@@ -25,25 +25,25 @@ const MockPlayer = () => {
   const [mixer, setMixer] = useState<THREE.AnimationMixer | null>(null);
   const [currentAction, setCurrentAction] = useState(null);
 
+  // TODO models loader
   useEffect(() => {
     const loader = new GLTFLoader();
     loader.load(
-      "../../models/Xbot.glb",
+      "http://localhost:5173/Xbot.glb",
       (gltf: { scene: any; animations: THREE.AnimationClip[] }) => {
+        console.log(gltf);
         const model = gltf.scene;
-        model.position.x = player.position.x;
-        model.position.y = player.position.y;
-        model.position.z = player.position.z;
+        model.position.set(
+          player.position.x,
+          player.position.y,
+          player.position.z,
+        );
         model.rotation.y = Math.PI;
 
-        model.traverse(function (node: {
-          isMesh: any;
-          castShadow: boolean;
-          receiveShadow: boolean;
-        }) {
+        model.traverse((node) => {
           if (node.isMesh) {
-            node.castShadow = true; // ensure every mesh can cast shadows
-            node.receiveShadow = true; // optional if model needs to receive shadows too
+            node.castShadow = true;
+            node.receiveShadow = true;
           }
         });
 
@@ -64,79 +64,85 @@ const MockPlayer = () => {
         setModelX(model);
         setMixer(mixer);
       },
+      (p) => {
+        console.log(p);
+      },
+      (error) => {
+        console.error("An error occurred while loading the model:", error);
+      },
     );
   }, []);
 
-  useFrame(() => {
-    if (mixer && gamepad) {
-      const rX = gamepad.axes[axisMapping.L_STICK_X];
-      const lY = gamepad.axes[axisMapping.L_STICK_Y];
-      // const rX = gamepad.axes[axisMapping.R_STICK_X];
-      const leftStickPress = gamepad.buttons[buttonMapping.L_STICK];
+  // useFrame(() => {
+  //   if (mixer && gamepad) {
+  //     const rX = gamepad.axes[axisMapping.L_STICK_X];
+  //     const lY = gamepad.axes[axisMapping.L_STICK_Y];
+  //     // const rX = gamepad.axes[axisMapping.R_STICK_X];
+  //     const leftStickPress = gamepad.buttons[buttonMapping.L_STICK];
+  //
+  //     // Get current position and rotation
+  //     const currentPosition = ref.current.position;
+  //     const currentRotation = ref.current.rotation;
+  //
+  //     ref.current.rotation.y = angleRef.current + Math.PI;
+  //
+  //     if (leftStickPress.pressed) {
+  //       movementSpeed = 0.04;
+  //     } else {
+  //       movementSpeed = 0.015;
+  //     }
+  //     if (Math.abs(rX) > 0.05) {
+  //       const move = new THREE.Vector3(0, 0, -1);
+  //       move.applyQuaternion(ref.current.quaternion);
+  //       move.normalize();
+  //
+  //       currentPosition.add(
+  //         move.multiplyScalar(Math.round(lY) * movementSpeed),
+  //       );
+  //
+  //       updatePlayer({
+  //         position: {
+  //           x: currentPosition.x,
+  //           y: currentPosition.y,
+  //           z: currentPosition.z,
+  //         },
+  //       });
+  //     }
+  //     mixer.update(0.016); // Update the mixer with a fixed time step
+  //   }
+  // });
 
-      // Get current position and rotation
-      const currentPosition = ref.current.position;
-      const currentRotation = ref.current.rotation;
+  // useEffect(() => {
+  //   if (mixer && gamepad) {
+  //     const rX = gamepad?.axes[axisMapping.L_STICK_X];
+  //     const leftStickPress = gamepad.buttons[buttonMapping.L_STICK];
+  //
+  //     if (Math.abs(rX) > 0.05) {
+  //       if (leftStickPress.pressed) {
+  //         changeAction(mixer._actions[1]);
+  //       } else {
+  //         changeAction(mixer._actions[2]);
+  //       }
+  //     } else {
+  //       changeAction(mixer._actions[0]);
+  //     }
+  //   }
+  // }, [gamepad]);
 
-      ref.current.rotation.y = angleRef.current + Math.PI;
+  // const changeAction = (toAction: SetStateAction<null>) => {
+  //   if (toAction !== currentAction) {
+  //     currentAction?.fadeOut(0.2);
+  //     toAction.reset().fadeIn(0.2).play();
+  //     setCurrentAction(toAction);
+  //   }
+  // };
 
-      if (leftStickPress.pressed) {
-        movementSpeed = 0.04;
-      } else {
-        movementSpeed = 0.015;
-      }
-      if (Math.abs(rX) > 0.05) {
-        const move = new THREE.Vector3(0, 0, -1);
-        move.applyQuaternion(ref.current.quaternion);
-        move.normalize();
-
-        currentPosition.add(
-          move.multiplyScalar(Math.round(lY) * movementSpeed),
-        );
-
-        updatePlayer({
-          position: {
-            x: currentPosition.x,
-            y: currentPosition.y,
-            z: currentPosition.z,
-          },
-        });
-      }
-      mixer.update(0.016); // Update the mixer with a fixed time step
-    }
-  });
-
-  useEffect(() => {
-    if (mixer && gamepad) {
-      const rX = gamepad?.axes[axisMapping.L_STICK_X];
-      const leftStickPress = gamepad.buttons[buttonMapping.L_STICK];
-
-      if (Math.abs(rX) > 0.05) {
-        if (leftStickPress.pressed) {
-          changeAction(mixer._actions[1]);
-        } else {
-          changeAction(mixer._actions[2]);
-        }
-      } else {
-        changeAction(mixer._actions[0]);
-      }
-    }
-  }, [gamepad]);
-
-  const changeAction = (toAction: SetStateAction<null>) => {
-    if (toAction !== currentAction) {
-      currentAction?.fadeOut(0.2);
-      toAction.reset().fadeIn(0.2).play();
-      setCurrentAction(toAction);
-    }
-  };
-
-  useEffect(() => {
-    const a = Math.abs(player.position.x) >= 5;
-    const b = Math.abs(player.position.z) >= 5;
-    if (a || b) {
-    }
-  }, [player.position.x, player.position.z]);
+  // useEffect(() => {
+  //   const a = Math.abs(player.position.x) >= 5;
+  //   const b = Math.abs(player.position.z) >= 5;
+  //   if (a || b) {
+  //   }
+  // }, [player.position.x, player.position.z]);
 
   return (
     <>
@@ -165,11 +171,6 @@ const MockPlayer = () => {
           <primitive object={modelX} ref={ref} />
         </mesh>
       )}
-      <CameraControls
-        gamepad={gamepad}
-        angleRef={angleRef}
-        angleRef2={angleRef2}
-      />
     </>
   );
 };

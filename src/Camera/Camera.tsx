@@ -46,7 +46,7 @@ const CameraControls = ({ gamepad, angleRef, angleRef2 }) => {
         playerPosition.z + radius * Math.cos(angleRef.current);
 
       // Make the camera look at the player's position
-      camera.lookAt(playerPosition.x, -0.5, playerPosition.z);
+      camera.lookAt(playerPosition.x, 0, playerPosition.z);
     }
   });
 
@@ -59,17 +59,7 @@ const CameraControls = ({ gamepad, angleRef, angleRef2 }) => {
     camera.lookAt(0, -0.5, 0); // Point camera to the center or a specific point
   }, [camera, angleRef, angleRef2]);
 
-  return (
-    <>
-      <OrbitControls
-        enableZoom={true}
-        minDistance={0}
-        maxDistance={70}
-        minPolarAngle={0}
-        maxPolarAngle={1}
-      />
-    </>
-  );
+  return null;
 };
 
 export default memo(CameraControls);

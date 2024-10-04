@@ -10,7 +10,7 @@ const initVector = new THREE.Vector3(0, Infinity, 0);
 
 const Terrain = ({ onLeftClick }) => {
   const [loadedTiles, setLoadedTiles] = useState(["0x0"]);
-  const [hovered, setHover] = useState([0, -0.5, 0]);
+  const [hovered, setHover] = useState([0, 0, 0]);
 
   const [colorMap, normalMap, roughnessMap] = useLoader(TextureLoader, [
     "../../textures/pavingStones/PavingStones139_1K-JPG/PavingStones139_1K-JPG_Color.jpg",
@@ -63,7 +63,7 @@ const Terrain = ({ onLeftClick }) => {
         // console.log("Intersection point:", intersect.point);
         setHover([
           Math.round(intersect.point.x),
-          -0.5,
+          0,
           Math.round(intersect.point.z),
         ]);
         break;
@@ -139,7 +139,7 @@ const Terrain = ({ onLeftClick }) => {
       <>
         {loadedTiles.map((tileKey) => {
           const { x, y } = parseCoordinates(tileKey);
-          const position = [x + 0.5, -0.5, y + 0.5];
+          const position = [x + 0.5, 0, y + 0.5];
           return <Tile key={tileKey} position={position} />;
         })}
       </>
