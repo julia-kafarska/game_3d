@@ -58,7 +58,7 @@ const Terrain = ({ onLeftClick }) => {
       true,
     );
 
-    for (let intersect of intersects) {
+    for (const intersect of intersects) {
       if (intersect.object.name === "sector") {
         // console.log("Intersection point:", intersect.point);
         setHover([

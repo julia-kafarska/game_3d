@@ -12,13 +12,13 @@ import { PlayerProvider } from "../store/player.tsx";
 import PreGenerated from "../pre_generated/pre_generated.tsx";
 const Scene = () => {
   const [objects, setObjects] = useState<IObject[]>([
-    // {
-    //   position: {
-    //     x: 0,
-    //     y: 0,
-    //     z: 0,
-    //   },
-    // },
+    {
+      position: {
+        x: 1,
+        y: 1,
+        z: 1,
+      },
+    },
   ]);
 
   const handleLeftClick = (params: {
@@ -49,23 +49,23 @@ const Scene = () => {
         <MockPlayer />
         <Terrain onLeftClick={handleLeftClick} />
 
-        {/*{objects.map((object: IObject) => (*/}
-        {/*  <Block*/}
-        {/*    position={object.position}*/}
-        {/*    key={`${object.position.x}-${object.position.y}-${object.position.z}`}*/}
-        {/*    onLeftClick={(params) => {*/}
-        {/*      handleLeftClick(params);*/}
-        {/*    }}*/}
-        {/*  />*/}
-        {/*))}*/}
-        {/*<PreGenerated*/}
-        {/*  position={{*/}
-        {/*    x: -2,*/}
-        {/*    y: 0,*/}
-        {/*    z: 10,*/}
-        {/*  }}*/}
-        {/*  handleLeftClick={handleLeftClick}*/}
-        {/*/>*/}
+        {objects.map((object: IObject) => (
+          <Block
+            position={object.position}
+            key={`${object.position.x}-${object.position.y}-${object.position.z}`}
+            onLeftClick={(params) => {
+              handleLeftClick(params);
+            }}
+          />
+        ))}
+        <PreGenerated
+          position={{
+            x: -2,
+            y: 0,
+            z: 10,
+          }}
+          handleLeftClick={handleLeftClick}
+        />
       </PlayerProvider>
     </MapProvider>
   );
