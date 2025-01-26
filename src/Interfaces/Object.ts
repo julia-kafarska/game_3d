@@ -1,4 +1,4 @@
-import { IPosition } from "./Position.ts";
+import { IPosition } from "./position.ts";
 
 export interface IObject {
   position: {

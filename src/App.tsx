@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
-import Scene from "./Scene/Scene.tsx";
+import Scene from "./scene/scene.tsx";
 import { Leva } from "leva";
-import AxisHelper from "./Helpers/AxisHelper.tsx";
+import AxisHelper from "./helpers/axis_helper.tsx";
 import { Debug, Physics } from "@react-three/cannon";
 import { useControls } from "leva";
 import { OrbitControls } from "@react-three/drei";

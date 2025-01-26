@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 
-import Weather from "../Weather/Weather.tsx";
-import Sun from "../Lights/Sun/Sun.tsx";
-import Terrain from "../Terrain/Terrain.tsx";
-import Block from "../Block/Block.tsx";
-import { IObject } from "../Interfaces/Object.ts";
-import MockPlayer from "../MockPlayer/Player.tsx";
-import FlameLight from "../Lights/Flame/Flame.tsx";
+import Weather from "../weather/weather.tsx";
+import Sun from "../lights/sun/sun.tsx";
+import Terrain from "../terrain/terrain.tsx";
+import Block from "../block/block.tsx";
+import { IObject } from "../interfaces/object.ts";
+import MockPlayer from "../player/player.tsx";
+import FlameLight from "../lights/flame/flame.tsx";
 import { MapProvider } from "../store/map.tsx";
 import { PlayerProvider } from "../store/player.tsx";
-import PreGenerated from "../PreGenerated/PreGenerated.tsx";
+import PreGenerated from "../pre_generated/pre_generated.tsx";
 const Scene = () => {
   const [objects, setObjects] = useState<IObject[]>([
     // {

@@ -1,6 +1,6 @@
 import { useControls } from "leva";
 import { a, useSpring } from "@react-spring/three";
-import Clouds from "./Clouds.tsx";
+import Clouds from "./clouds.tsx";
 
 const Weather = () => {
   const { fog } = useControls({

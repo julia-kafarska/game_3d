@@ -1,5 +1,5 @@
 import { useGLTF } from "@react-three/drei";
-import { IModel } from "../src/Interfaces/Model";
+import { IModel } from "../src/interfaces/model";
 
 const Model = ({ url, position }: IModel) => {
   const { scene } = useGLTF(url);

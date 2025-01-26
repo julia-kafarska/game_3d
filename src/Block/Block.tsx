@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { ITerrainBlock } from "../Interfaces/Terrain.ts";
+import { ITerrainBlock } from "../interfaces/terrain.ts";
 import { ThreeEvent } from "@react-three/fiber";
 import { useBox } from "@react-three/cannon";
 import { color1, color2 } from "../const/colors.ts";

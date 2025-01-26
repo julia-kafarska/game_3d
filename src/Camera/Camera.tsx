@@ -1,65 +1,52 @@
-import { memo, useEffect } from "react";
-import { OrbitControls } from "@react-three/drei";
+// CameraControls.tsx
 import { useFrame, useThree } from "@react-three/fiber";
-import { axisMapping } from "../store/gamePad.ts";
-import { usePlayerContext } from "../store/player.tsx";
-import { Vector3 } from "three";
+import * as THREE from "three";
+import { MutableRefObject } from "react";
 
-const radiusInit = 10;
+interface CameraControlsProps {
+  /** The ref to your player's Object3D (from useRef or R3F physics) */
+  playerRef: MutableRefObject<THREE.Object3D | undefined>;
+  /** The ref to the current Y rotation angle (angleRef.current) */
+  angleRef: MutableRefObject<number>;
+  /** Distance behind the player */
+  offsetBehind?: number;
+  /** Height above the player */
+  offsetUp?: number;
+}
 
-const CameraControls = ({ gamepad, angleRef, angleRef2 }) => {
-  const { player } = usePlayerContext();
-  // const { camera } = useThree(); // Use the camera from useThree
+/**
+ * A simple chase-cam that always keeps the camera behind (and slightly above)
+ * the player, based on the player's angleRef rotation.
+ */
+export function CameraControls({
+  playerRef,
+  angleRef,
+  offsetBehind = 5,
+  offsetUp = 2,
+}: CameraControlsProps) {
   const { camera } = useThree();
 
   useFrame(() => {
-    // raycaster.setFromCamera(mouse, camera);
-    // const intersects = raycaster.intersectObjects(scene.children, true);
-    // if (intersects.length === 3) {
-    //   console.log(intersects);
-    // }
-    if (gamepad && player) {
-      // const rX = gamepad.axes[axisMapping.R_STICK_X];
-      // const rY = gamepad.axes[axisMapping.R_STICK_Y]; // left stick up and down
-      //
-      // const rotationSpeed = 0.05;
-      let radius = radiusInit;
-      //
-      const playerPosition = player.position;
-      //
-      // // Update angles based on gamepad input
-      // if (Math.abs(rX) > 0.1) {
-      //   angleRef.current += rX * rotationSpeed;
-      // }
-      // if (Math.abs(rY) > 0.1) {
-      //   const newAngle2 = angleRef2.current + rY;
-      //   if (newAngle2 >= 3 && newAngle2 < 18) {
-      //     angleRef2.current = newAngle2;
-      //   }
-      // }
+    if (!playerRef.current) return;
 
-      // Calculate the new camera position based on the angle and radius
-      camera.position.x =
-        playerPosition.x + radius * Math.sin(angleRef.current);
-      camera.position.y = Math.PI * angleRef2.current;
-      camera.position.z =
-        playerPosition.z + radius * Math.cos(angleRef.current);
+    // Current player position
+    const currentPosition = playerRef.current.position;
 
-      // Make the camera look at the player's position
-      camera.lookAt(playerPosition.x, 0, playerPosition.z);
-    }
+    // Compute the player's forward direction based on angleRef
+    const forwardDir = new THREE.Vector3(0, 0, -1);
+    forwardDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), angleRef.current);
+
+    // Position camera behind the player
+    camera.position.set(
+      currentPosition.x - forwardDir.x * offsetBehind,
+      currentPosition.y + offsetUp,
+      currentPosition.z - forwardDir.z * offsetBehind,
+    );
+
+    // Always look at the player's position
+    camera.lookAt(currentPosition.x, currentPosition.y, currentPosition.z);
   });
 
-  useEffect(() => {
-    // Set initial camera position
-    camera.position.x = radiusInit * Math.sin(angleRef.current);
-    camera.position.y = Math.PI * angleRef2.current;
-    camera.position.z = 1 + radiusInit * Math.cos(angleRef.current);
-
-    camera.lookAt(0, -0.5, 0); // Point camera to the center or a specific point
-  }, [camera, angleRef, angleRef2]);
-
+  // This is a "logic" component only, no UI
   return null;
-};
-
-export default memo(CameraControls);
+}

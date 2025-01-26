@@ -1,5 +1,5 @@
-import { IPosition } from "./Position.ts";
-import { IBoxSize } from "./Size.ts";
+import { IPosition } from "./position.ts";
+import { IBoxSize } from "./size.ts";
 
 export interface ILeftClickParams extends IPosition {
   position: IPosition;
