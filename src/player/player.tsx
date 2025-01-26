@@ -158,6 +158,8 @@ const MockPlayer = () => {
     const anyMovement = keys.KeyW || keys.KeyS || keys.KeyA || keys.KeyD;
     if (anyMovement) {
       // If SHIFT is down, run. Otherwise, walk
+
+      console.log(mixer._actions);
       if (isRunning) {
         changeAction(mixer._actions[2]); // run
       } else {
@@ -178,7 +180,7 @@ const MockPlayer = () => {
         playerRef={ref}
         angleRef={angleRef}
         offsetBehind={6} // Adjust how far behind the character the camera sits
-        offsetUp={3} // Adjust how high above the character the camera is
+        offsetUp={5} // Adjust how high above the character the camera is
       />
 
       {/* Debug HUD (optional) */}
