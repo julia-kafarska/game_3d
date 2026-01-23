@@ -1,10 +1,12 @@
 import { Canvas } from "@react-three/fiber";
-import Scene from "./scene/scene.tsx";
+import Scene from "./components/scene/scene";
 import { Leva } from "leva";
-import AxisHelper from "./helpers/axis_helper.tsx";
+import AxisHelper from "./components/helpers/axis-helper";
 import { Debug, Physics } from "@react-three/cannon";
 import { useControls } from "leva";
-import { OrbitControls } from "@react-three/drei";
+import { MapProvider } from "./store/map-context";
+import { PlayerProvider } from "./store/player-context";
+import { MiniMap } from "./components/ui/mini-map";
 
 function App() {
   const gravity = useControls("Gravity", {
@@ -14,32 +16,28 @@ function App() {
   });
 
   return (
-    <>
-      <Leva />
-      <Canvas
-        shadows
-        camera={{ position: [0, 5, 10], near: 0.1, far: 10000 }}
-        style={{ height: "100vh", width: "100vw" }}
-        gl={{
-          antialias: true,
-          logarithmicDepthBuffer: true,
-        }}
-      >
-        <AxisHelper />
-        <Physics gravity={[gravity.x, gravity.y, gravity.z]}>
-          <Debug>
-            <Scene />
-          </Debug>
-        </Physics>
-        <OrbitControls
-          enableZoom={true}
-          minDistance={5}
-          maxDistance={70}
-          minPolarAngle={0}
-          maxPolarAngle={1}
-        />
-      </Canvas>
-    </>
+    <MapProvider>
+      <PlayerProvider>
+        <Leva />
+        <MiniMap size={400} scale={1} />
+        <Canvas
+          shadows
+          camera={{ position: [0, 5, 10], near: 0.1, far: 10000 }}
+          style={{ height: "100vh", width: "100vw" }}
+          gl={{
+            antialias: true,
+            logarithmicDepthBuffer: true,
+          }}
+        >
+          <AxisHelper />
+          <Physics gravity={[gravity.x, gravity.y, gravity.z]}>
+            <Debug>
+              <Scene />
+            </Debug>
+          </Physics>
+        </Canvas>
+      </PlayerProvider>
+    </MapProvider>
   );
 }
 
