@@ -3,6 +3,11 @@ import { useFrame } from "@react-three/fiber";
 import { useDayNightStore } from "../../store/day-night-store";
 import { useControls } from "leva";
 import { useMemo } from "react";
+import {
+  skySettings,
+  starsSettings,
+  sunSettings,
+} from "../../constants/settings";
 
 export function Sky() {
   const { cycleSpeed, isPaused, setCycleSpeed, togglePause } =
@@ -41,32 +46,37 @@ export function Sky() {
 
   // Calculate sky parameters based on time of day
   const skyParams = useMemo(() => {
-    const sunHeight = sunPosition.y / 200; // Normalized sun height (-1 to 1)
+    const sunHeight = sunPosition.y / sunSettings.orbitRadius; // Normalized sun height (-1 to 1)
 
     // Turbidity: hazier at sunrise/sunset
-    let turbidity = 8;
+    let turbidity = skySettings.turbidity;
     if (sunHeight > -0.1 && sunHeight < 0.3) {
-      turbidity = 10; // More haze at sunrise/sunset
+      turbidity = skySettings.turbidityTwilight; // More haze at sunrise/sunset
     }
 
     // Rayleigh scattering: affects blue color
-    let rayleigh = 2;
+    let rayleigh = skySettings.rayleigh;
     if (sunHeight < 0) {
-      rayleigh = 0.5; // Less blue at night
+      rayleigh = skySettings.rayleighNight; // Less blue at night
     } else if (sunHeight < 0.2) {
-      rayleigh = 1 + sunHeight * 5; // Transition
+      rayleigh =
+        skySettings.rayleighNight +
+        (sunHeight * (skySettings.rayleigh - skySettings.rayleighNight)) / 0.2; // Transition
     }
 
     // Mie scattering: sun glow
-    const mieCoefficient = sunHeight > 0 ? 0.005 : 0.001;
-    const mieDirectionalG = 0.8;
+    const mieCoefficient =
+      sunHeight > 0
+        ? skySettings.mieCoefficient
+        : skySettings.mieCoefficientNight;
+    const mieDirectionalG = skySettings.mieDirectionalG;
 
     return { turbidity, rayleigh, mieCoefficient, mieDirectionalG };
   }, [sunPosition.y]);
 
   // Stars fade based on sun position
   const starsFade = useMemo(() => {
-    const sunHeight = sunPosition.y / 200;
+    const sunHeight = sunPosition.y / sunSettings.orbitRadius;
     if (sunHeight > 0.1) return 0; // No stars during day
     if (sunHeight < -0.1) return 1; // Full stars at night
     // Fade stars during twilight
@@ -76,7 +86,7 @@ export function Sky() {
   return (
     <>
       <DreiSky
-        distance={450000}
+        distance={skySettings.distance}
         sunPosition={[
           sunPosition.x,
           Math.max(sunPosition.y, -50),
@@ -87,15 +97,15 @@ export function Sky() {
         mieCoefficient={skyParams.mieCoefficient}
         mieDirectionalG={skyParams.mieDirectionalG}
       />
-      {starsFade > 0 && (
+      {starsSettings.enabled && starsFade > 0 && (
         <Stars
-          radius={300}
-          depth={100}
-          count={5000}
-          factor={4}
-          saturation={0}
+          radius={starsSettings.radius}
+          depth={starsSettings.depth}
+          count={starsSettings.count}
+          factor={starsSettings.factor}
+          saturation={starsSettings.saturation}
           fade
-          speed={0.5}
+          speed={starsSettings.speed}
         />
       )}
     </>

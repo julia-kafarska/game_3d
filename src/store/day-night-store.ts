@@ -1,4 +1,10 @@
 import { create } from "zustand";
+import {
+  dayNightSettings,
+  sunSettings,
+  moonSettings,
+  ambientLightSettings,
+} from "../constants/settings";
 
 interface DayNightState {
   // Time of day: 0 = midnight, 0.25 = sunrise, 0.5 = noon, 0.75 = sunset, 1 = midnight
@@ -23,12 +29,9 @@ interface DayNightState {
   isNight: () => boolean;
 }
 
-// Distance from origin for sun/moon orbit
-const ORBIT_RADIUS = 200;
-
 export const useDayNightStore = create<DayNightState>((set, get) => ({
-  timeOfDay: 0.35, // Start at morning
-  cycleSpeed: 1,
+  timeOfDay: dayNightSettings.initialTimeOfDay,
+  cycleSpeed: dayNightSettings.defaultCycleSpeed,
   isPaused: false,
 
   setTimeOfDay: (time: number) => set({ timeOfDay: time % 1 }),
@@ -41,9 +44,9 @@ export const useDayNightStore = create<DayNightState>((set, get) => ({
     const { isPaused, cycleSpeed, timeOfDay } = get();
     if (isPaused) return;
 
-    // Full cycle in 24 real minutes at speed 1
-    // So 1 second = 1/(24*60) = 0.000694 of a day at speed 1
-    const dayProgress = (deltaSeconds / (24 * 60)) * cycleSpeed;
+    // Full cycle in dayLengthMinutes real minutes at speed 1
+    const dayProgress =
+      (deltaSeconds / (dayNightSettings.dayLengthMinutes * 60)) * cycleSpeed;
     set({ timeOfDay: (timeOfDay + dayProgress) % 1 });
   },
 
@@ -54,8 +57,8 @@ export const useDayNightStore = create<DayNightState>((set, get) => ({
     const angle = (timeOfDay - 0.25) * Math.PI * 2;
 
     return {
-      x: Math.cos(angle) * ORBIT_RADIUS,
-      y: Math.sin(angle) * ORBIT_RADIUS,
+      x: Math.cos(angle) * sunSettings.orbitRadius,
+      y: Math.sin(angle) * sunSettings.orbitRadius,
       z: 50, // Slight offset for more interesting shadows
     };
   },
@@ -66,8 +69,8 @@ export const useDayNightStore = create<DayNightState>((set, get) => ({
     const angle = (timeOfDay - 0.25 + 0.5) * Math.PI * 2;
 
     return {
-      x: Math.cos(angle) * ORBIT_RADIUS,
-      y: Math.sin(angle) * ORBIT_RADIUS,
+      x: Math.cos(angle) * moonSettings.orbitRadius,
+      y: Math.sin(angle) * moonSettings.orbitRadius,
       z: -50,
     };
   },
@@ -92,7 +95,7 @@ export const useDayNightStore = create<DayNightState>((set, get) => ({
     if (moonHeight <= 0) return 0;
 
     // Moon is dimmer than sun
-    return Math.pow(moonHeight, 0.5) * 0.3;
+    return Math.pow(moonHeight, 0.5) * moonSettings.intensity;
   },
 
   getAmbientIntensity: () => {
@@ -101,16 +104,24 @@ export const useDayNightStore = create<DayNightState>((set, get) => ({
 
     // Ambient light: brighter during day, dimmer at night
     if (sunHeight > 0) {
-      return 0.3 + sunHeight * 0.4;
+      return (
+        ambientLightSettings.intensityNight +
+        sunHeight *
+          (ambientLightSettings.intensityDay -
+            ambientLightSettings.intensityNight)
+      );
     } else {
       // Night time - very dim ambient
-      return 0.1;
+      return ambientLightSettings.intensityNight;
     }
   },
 
   isNight: () => {
     const { timeOfDay } = get();
-    // Night is roughly 0.75 to 0.25 (sunset to sunrise)
-    return timeOfDay < 0.25 || timeOfDay > 0.75;
+    // Night is roughly sunsetEnd to sunriseStart
+    return (
+      timeOfDay < dayNightSettings.sunriseStart ||
+      timeOfDay > dayNightSettings.sunsetEnd
+    );
   },
 }));

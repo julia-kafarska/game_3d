@@ -2,7 +2,7 @@ import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { useEffect, useRef, useState } from "react";
 import { TextureLoader } from "three";
-import { sectorSize } from "../../constants/settings";
+import { sectorSize, hoverIndicatorSettings } from "../../constants/settings";
 import { Tile } from "./tile";
 import { HoverIndicator } from "./hover-indicator";
 import { usePlayerContext } from "../../store/player-context";
@@ -34,22 +34,8 @@ const Terrain = (_props: TerrainProps) => {
     "../../textures/pavingStones/PavingStones139_1K-JPG/PavingStones139_1K-JPG_Roughness.jpg",
   ]);
 
-  const { camera, raycaster, scene, pointer } = useThree();
+  const { camera, raycaster, pointer } = useThree();
   const interactableObjects = useRef<THREE.Mesh[]>([]);
-
-  useEffect(() => {
-    const axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
-
-    return () => {
-      scene.remove(axesHelper);
-    };
-  }, [scene]);
-
-  useEffect(() => {
-    camera.position.set(0, 10, 10);
-    camera.lookAt(0, 0, 0);
-  }, [camera]);
 
   useFrame(() => {
     raycaster.setFromCamera(pointer, camera);
@@ -85,7 +71,7 @@ const Terrain = (_props: TerrainProps) => {
 
   return (
     <>
-      <HoverIndicator position={hovered} />
+      {hoverIndicatorSettings.enabled && <HoverIndicator position={hovered} />}
 
       {sectors.map((sector) => {
         // Position at sector center (worldX + half sector size)

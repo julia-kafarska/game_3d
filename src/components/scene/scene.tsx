@@ -11,6 +11,7 @@ import { Moon } from "../sky/moon";
 import { Fog } from "../atmosphere/fog";
 import { Clouds } from "../atmosphere/clouds";
 import { WaterPlane } from "../water/water-plane";
+import { StatsCollector } from "../ui/performance-stats";
 
 const Scene = () => {
   const [objects, setObjects] = useState<IObject[]>([
@@ -43,6 +44,7 @@ const Scene = () => {
 
   return (
     <>
+      <StatsCollector />
       <Sky />
       <Sun />
       <Moon />

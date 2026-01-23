@@ -1,21 +1,34 @@
 import { useEffect, useRef, MutableRefObject } from "react";
 import { useThree } from "@react-three/fiber";
+import { playerSettings, cameraSettings } from "../../constants/settings";
+import { useCameraStore } from "../../store/camera-store";
 
 interface UseMouseLookOptions {
   angleRef: MutableRefObject<number>;
   pitchRef: MutableRefObject<number>;
   sensitivity?: number;
-  minPitch?: number;
-  maxPitch?: number;
 }
 
 export function useMouseLook({
   angleRef,
   pitchRef,
-  sensitivity = 0.003,
-  minPitch = -0.3,
-  maxPitch = 1.0,
+  sensitivity = playerSettings.mouseSensitivity,
 }: UseMouseLookOptions) {
+  const cameraMode = useCameraStore((state) => state.mode);
+
+  // Get pitch limits based on camera mode
+  const getPitchLimits = () => {
+    if (cameraMode === 3) {
+      return {
+        min: cameraSettings.firstPerson.minPitch,
+        max: cameraSettings.firstPerson.maxPitch,
+      };
+    }
+    return {
+      min: playerSettings.pitchMin,
+      max: playerSettings.pitchMax,
+    };
+  };
   const { gl, size } = useThree();
   const lastMousePos = useRef<{ x: number; y: number } | null>(null);
 
@@ -34,7 +47,8 @@ export function useMouseLook({
       // Horizontal rotation (yaw)
       angleRef.current -= deltaX * sensitivity;
 
-      // Vertical rotation (pitch) - clamped
+      // Vertical rotation (pitch) - clamped based on camera mode
+      const { min: minPitch, max: maxPitch } = getPitchLimits();
       pitchRef.current += deltaY * sensitivity;
       pitchRef.current = Math.max(
         minPitch,
@@ -61,15 +75,7 @@ export function useMouseLook({
       canvas.removeEventListener("mouseleave", handleMouseLeave);
       canvas.removeEventListener("mouseenter", handleMouseEnter);
     };
-  }, [
-    gl.domElement,
-    angleRef,
-    pitchRef,
-    sensitivity,
-    minPitch,
-    maxPitch,
-    size,
-  ]);
+  }, [gl.domElement, angleRef, pitchRef, sensitivity, cameraMode, size]);
 
   return {};
 }

@@ -7,33 +7,51 @@ import { useControls } from "leva";
 import { MapProvider } from "./store/map-context";
 import { PlayerProvider } from "./store/player-context";
 import { MiniMap } from "./components/ui/mini-map";
+import { DevPanel } from "./components/ui/dev-panel";
+import {
+  physicsSettings,
+  renderSettings,
+  cameraSettings,
+  debugSettings,
+  statsSettings,
+} from "./constants/settings";
 
 function App() {
   const gravity = useControls("Gravity", {
-    x: { value: 0, min: -10, max: 10, step: 0.1 },
-    y: { value: -9.8, min: -10, max: 10, step: 0.1 },
-    z: { value: 0, min: -10, max: 10, step: 0.1 },
+    x: { value: physicsSettings.gravity.x, min: -20, max: 20, step: 0.1 },
+    y: { value: physicsSettings.gravity.y, min: -20, max: 20, step: 0.1 },
+    z: { value: physicsSettings.gravity.z, min: -20, max: 20, step: 0.1 },
   });
 
   return (
     <MapProvider>
       <PlayerProvider>
         <Leva />
-        <MiniMap size={400} scale={1} />
+        {debugSettings.showMiniMap && <MiniMap size={400} scale={1} />}
+        {statsSettings.enabled && <DevPanel />}
         <Canvas
-          shadows
-          camera={{ position: [0, 5, 10], near: 0.1, far: 10000 }}
+          shadows={renderSettings.shadowsEnabled}
+          camera={{
+            position: [0, 5, 10],
+            fov: cameraSettings.fov,
+            near: cameraSettings.near,
+            far: cameraSettings.far,
+          }}
           style={{ height: "100vh", width: "100vw" }}
           gl={{
-            antialias: true,
-            logarithmicDepthBuffer: true,
+            antialias: renderSettings.antialias,
+            logarithmicDepthBuffer: renderSettings.logarithmicDepthBuffer,
           }}
         >
-          <AxisHelper />
+          {debugSettings.showAxisHelper && <AxisHelper />}
           <Physics gravity={[gravity.x, gravity.y, gravity.z]}>
-            <Debug>
+            {debugSettings.showPhysicsDebug ? (
+              <Debug>
+                <Scene />
+              </Debug>
+            ) : (
               <Scene />
-            </Debug>
+            )}
           </Physics>
         </Canvas>
       </PlayerProvider>

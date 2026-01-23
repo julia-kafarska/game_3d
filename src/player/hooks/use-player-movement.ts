@@ -1,6 +1,11 @@
 import { useCallback, RefObject, MutableRefObject } from "react";
 import * as THREE from "three";
-import { BASE_SPEED } from "../constants";
+import {
+  BASE_SPEED,
+  RUN_MULTIPLIER,
+  DEV_SPEED_MULTIPLIER,
+  ROTATION_SPEED,
+} from "../constants";
 import type { KeyState } from "./use-keyboard-input";
 import { useTerrainStore } from "../../store/terrain-store";
 
@@ -25,17 +30,17 @@ export function usePlayerMovement() {
     }: MovementParams): THREE.Vector3 | null => {
       if (!meshRef.current) return null;
 
-      let speed = isRunning ? BASE_SPEED * 3 : BASE_SPEED;
+      let speed = isRunning ? BASE_SPEED * RUN_MULTIPLIER : BASE_SPEED;
       if (devSpeedEnabled) {
-        speed *= 20;
+        speed *= DEV_SPEED_MULTIPLIER;
       }
 
       // Rotate with A/D
       if (keys.KeyA) {
-        angleRef.current += 0.03;
+        angleRef.current += ROTATION_SPEED;
       }
       if (keys.KeyD) {
-        angleRef.current -= 0.03;
+        angleRef.current -= ROTATION_SPEED;
       }
 
       // Apply player rotation to mesh

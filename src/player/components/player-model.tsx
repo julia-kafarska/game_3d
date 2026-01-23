@@ -12,12 +12,14 @@ interface PlayerModelProps {
   initialPosition: IPosition;
   meshRef: RefObject<THREE.Object3D>;
   onModelLoaded: (model: THREE.Group, gltf: GLTFResult) => void;
+  visible?: boolean;
 }
 
 export function PlayerModel({
   initialPosition,
   meshRef,
   onModelLoaded,
+  visible = true,
 }: PlayerModelProps) {
   const [model, setModel] = useState<THREE.Group | null>(null);
 
@@ -54,7 +56,7 @@ export function PlayerModel({
   if (!model) return null;
 
   return (
-    <mesh>
+    <mesh visible={visible}>
       <primitive object={model} ref={meshRef} />
     </mesh>
   );

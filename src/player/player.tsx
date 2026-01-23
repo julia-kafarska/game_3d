@@ -10,12 +10,14 @@ import { usePlayerAnimation } from "./hooks/use-player-animation";
 import { usePlayerMovement } from "./hooks/use-player-movement";
 import { useMouseLook } from "./hooks/use-mouse-look";
 import { PlayerModel } from "./components/player-model";
-import { PlayerHud } from "./components/player-hud";
+import { cameraSettings, playerSettings } from "../constants/settings";
+import { useCameraStore } from "../store/camera-store";
 
 const Player = () => {
   const { player, updatePlayer } = usePlayerContext();
   const playerAngleRef = useRef(0); // Player facing direction (mouse controls this)
-  const pitchRef = useRef(0.3); // Camera pitch (mouse vertical)
+  const pitchRef = useRef(cameraSettings.thirdPerson.initialPitch); // Camera pitch (mouse vertical)
+  const cameraMode = useCameraStore((state) => state.mode);
 
   const [ref] = useBox(() => ({
     mass: 1,
@@ -31,7 +33,7 @@ const Player = () => {
   useMouseLook({
     angleRef: playerAngleRef,
     pitchRef,
-    sensitivity: 0.003,
+    sensitivity: playerSettings.mouseSensitivity,
   });
 
   const handleModelLoaded = (model: THREE.Group, gltf: any) => {
@@ -69,16 +71,13 @@ const Player = () => {
         playerRef={ref}
         angleRef={playerAngleRef}
         pitchRef={pitchRef}
-        offsetBehind={6}
-        offsetUp={3}
       />
-
-      <PlayerHud position={player.position} />
 
       <PlayerModel
         initialPosition={player.position}
         meshRef={ref}
         onModelLoaded={handleModelLoaded}
+        visible={cameraMode !== 3}
       />
     </>
   );

@@ -1,4 +1,9 @@
-export const BASE_SPEED = 0.022;
+import { playerSettings } from "../constants/settings";
+
+export const BASE_SPEED = playerSettings.baseSpeed;
+export const RUN_MULTIPLIER = playerSettings.runMultiplier;
+export const DEV_SPEED_MULTIPLIER = playerSettings.devSpeedMultiplier;
+export const ROTATION_SPEED = playerSettings.rotationSpeed;
 
 export const ANIMATION_INDICES = {
   IDLE: 2,
