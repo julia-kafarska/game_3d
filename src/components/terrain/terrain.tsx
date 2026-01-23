@@ -1,12 +1,13 @@
 import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { TextureLoader } from "three";
 import { sectorSize, hoverIndicatorSettings } from "../../constants/settings";
-import { Tile } from "./tile";
 import { HoverIndicator } from "./hover-indicator";
 import { usePlayerContext } from "../../store/player-context";
 import { useSectorManager } from "../../terrain/hooks/use-sector-manager";
+import { useVolumetricManager } from "../../terrain/hooks/use-volumetric-manager";
+import { VolumetricChunk } from "./volumetric-chunk";
 import SectorObjects from "../objects/sector-objects";
 
 interface TerrainProps {
@@ -22,7 +23,15 @@ const Terrain = (_props: TerrainProps) => {
   const [hovered, setHover] = useState<[number, number, number]>([0, 0, 0]);
   const { player } = usePlayerContext();
 
-  // Use sector manager to dynamically load/unload terrain sectors
+  // Use volumetric manager for 3D terrain with caves
+  const { chunks: volumetricChunks, isLoading: volumetricLoading } =
+    useVolumetricManager({
+      playerX: player.position.x,
+      playerY: player.position.y,
+      playerZ: player.position.z,
+    });
+
+  // Still use sector manager for objects (trees, rocks, etc.)
   const { sectors } = useSectorManager({
     playerX: player.position.x,
     playerZ: player.position.z,
@@ -48,7 +57,11 @@ const Terrain = (_props: TerrainProps) => {
     );
 
     for (const intersect of intersects) {
-      if (intersect.object.name === "sector") {
+      // Check for both sector (legacy) and volumetric chunk names
+      if (
+        intersect.object.name === "sector" ||
+        intersect.object.name.startsWith("volumetric-chunk")
+      ) {
         setHover([
           Math.round(intersect.point.x),
           Math.round(intersect.point.y),
@@ -73,28 +86,33 @@ const Terrain = (_props: TerrainProps) => {
     <>
       {hoverIndicatorSettings.enabled && <HoverIndicator position={hovered} />}
 
-      {sectors.map((sector) => {
-        // Position at sector center (worldX + half sector size)
-        const position: [number, number, number] = [
-          sector.worldX + sectorSize / 2,
-          0,
-          sector.worldZ + sectorSize / 2,
-        ];
-        return (
-          <group key={sector.key}>
-            <Tile
-              position={position}
-              colorMap={colorMap}
-              normalMap={normalMap}
-              roughnessMap={roughnessMap}
-              interactableObjects={interactableObjects}
-              heightmap={sector.heightmap}
-              biome={sector.biome}
-            />
-            <SectorObjects objects={sector.objects} />
-          </group>
-        );
-      })}
+      {/* Render volumetric terrain chunks */}
+      {volumetricChunks.map((chunk) => (
+        <VolumetricChunk
+          key={chunk.key}
+          chunk={chunk}
+          interactableObjects={interactableObjects}
+        />
+      ))}
+
+      {/* Render sector objects (trees, rocks, etc.) - still from legacy sectors */}
+      {sectors.map((sector) => (
+        <SectorObjects key={`objects-${sector.key}`} objects={sector.objects} />
+      ))}
+
+      {/* Loading indicator could go here */}
+      {volumetricLoading && (
+        <mesh
+          position={[
+            player.position.x,
+            player.position.y + 10,
+            player.position.z,
+          ]}
+        >
+          <sphereGeometry args={[0.5, 8, 8]} />
+          <meshBasicMaterial color="yellow" wireframe />
+        </mesh>
+      )}
     </>
   );
 };

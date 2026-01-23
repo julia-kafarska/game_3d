@@ -294,7 +294,7 @@ export function DevPanel() {
           }}
         >
           <span style={{ color: "#aaa" }}>Sectors</span>
-          <span style={{ fontFamily: "monospace" }}>{sectors.length}</span>
+          <span style={{ fontFamily: "monospace" }}>{sectors.size}</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <span style={{ color: "#aaa" }}>Geometries</span>

@@ -111,8 +111,8 @@ function warpedCoords(x: number, z: number): { wx: number; wz: number } {
   };
 }
 
-// Combined terrain height function
-function getTerrainHeight(x: number, z: number): number {
+// Combined terrain height function - EXPORTED for volumetric terrain
+export function getTerrainHeight(x: number, z: number): number {
   // Apply domain warping for more organic shapes
   const { wx, wz } = warpedCoords(x, z);
 
@@ -215,6 +215,237 @@ function determineBiome(
   }
 
   return "plains";
+}
+
+// Height thresholds for color transitions (matching tile.tsx)
+const HEIGHT_WATER = -2;
+const HEIGHT_SAND = 1;
+const HEIGHT_GRASS = 8;
+const HEIGHT_ROCK = 20;
+
+// Base colors for terrain (RGB 0-1)
+const terrainColors = {
+  water: { r: 0.204, g: 0.596, b: 0.859 },
+  sand: { r: 0.957, g: 0.816, b: 0.247 },
+  grass: { r: 0.18, g: 0.8, b: 0.443 },
+  hill: { r: 0.545, g: 0.451, b: 0.333 },
+  rock: { r: 0.498, g: 0.549, b: 0.553 },
+  snow: { r: 0.925, g: 0.941, b: 0.945 },
+};
+
+// Biome-specific color palettes
+const biomeColorPalettes: Record<string, typeof terrainColors> = {
+  water: terrainColors,
+  beach: {
+    water: { r: 0.204, g: 0.596, b: 0.859 },
+    sand: { r: 0.961, g: 0.871, b: 0.702 },
+    grass: { r: 0.565, g: 0.933, b: 0.565 },
+    hill: { r: 0.545, g: 0.451, b: 0.333 },
+    rock: { r: 0.498, g: 0.549, b: 0.553 },
+    snow: { r: 0.925, g: 0.941, b: 0.945 },
+  },
+  desert: {
+    water: { r: 0.204, g: 0.596, b: 0.859 },
+    sand: { r: 0.824, g: 0.706, b: 0.549 },
+    grass: { r: 0.741, g: 0.718, b: 0.42 },
+    hill: { r: 0.804, g: 0.522, b: 0.247 },
+    rock: { r: 0.627, g: 0.322, b: 0.176 },
+    snow: { r: 0.871, g: 0.722, b: 0.529 },
+  },
+  savanna: {
+    water: { r: 0.204, g: 0.596, b: 0.859 },
+    sand: { r: 0.855, g: 0.647, b: 0.125 },
+    grass: { r: 0.604, g: 0.804, b: 0.196 },
+    hill: { r: 0.545, g: 0.271, b: 0.075 },
+    rock: { r: 0.42, g: 0.267, b: 0.137 },
+    snow: { r: 0.925, g: 0.941, b: 0.945 },
+  },
+  plains: terrainColors,
+  forest: {
+    water: { r: 0.204, g: 0.596, b: 0.859 },
+    sand: { r: 0.545, g: 0.271, b: 0.075 },
+    grass: { r: 0.133, g: 0.545, b: 0.133 },
+    hill: { r: 0.0, g: 0.392, b: 0.0 },
+    rock: { r: 0.333, g: 0.42, b: 0.184 },
+    snow: { r: 0.925, g: 0.941, b: 0.945 },
+  },
+  hills: {
+    water: { r: 0.204, g: 0.596, b: 0.859 },
+    sand: { r: 0.855, g: 0.647, b: 0.125 },
+    grass: { r: 0.42, g: 0.557, b: 0.137 },
+    hill: { r: 0.545, g: 0.451, b: 0.333 },
+    rock: { r: 0.412, g: 0.412, b: 0.412 },
+    snow: { r: 0.925, g: 0.941, b: 0.945 },
+  },
+  mountains: {
+    water: { r: 0.204, g: 0.596, b: 0.859 },
+    sand: { r: 0.663, g: 0.663, b: 0.663 },
+    grass: { r: 0.29, g: 0.486, b: 0.349 },
+    hill: { r: 0.439, g: 0.502, b: 0.565 },
+    rock: { r: 0.373, g: 0.373, b: 0.373 },
+    snow: { r: 1.0, g: 0.98, b: 0.98 },
+  },
+  tundra: {
+    water: { r: 0.275, g: 0.51, b: 0.706 },
+    sand: { r: 0.467, g: 0.533, b: 0.6 },
+    grass: { r: 0.561, g: 0.737, b: 0.561 },
+    hill: { r: 0.439, g: 0.502, b: 0.565 },
+    rock: { r: 0.412, g: 0.412, b: 0.412 },
+    snow: { r: 0.941, g: 1.0, b: 1.0 },
+  },
+};
+
+// Lerp between two colors
+function lerpColor(
+  c1: { r: number; g: number; b: number },
+  c2: { r: number; g: number; b: number },
+  t: number,
+): { r: number; g: number; b: number } {
+  return {
+    r: c1.r + (c2.r - c1.r) * t,
+    g: c1.g + (c2.g - c1.g) * t,
+    b: c1.b + (c2.b - c1.b) * t,
+  };
+}
+
+// Get color for height using a color palette
+function getColorForHeight(
+  height: number,
+  colors: typeof terrainColors,
+): { r: number; g: number; b: number } {
+  if (height < HEIGHT_WATER) {
+    return colors.water;
+  } else if (height < HEIGHT_SAND) {
+    const t = (height - HEIGHT_WATER) / (HEIGHT_SAND - HEIGHT_WATER);
+    return lerpColor(colors.water, colors.sand, t);
+  } else if (height < HEIGHT_GRASS) {
+    const t = (height - HEIGHT_SAND) / (HEIGHT_GRASS - HEIGHT_SAND);
+    return lerpColor(colors.sand, colors.grass, t);
+  } else if (height < HEIGHT_ROCK) {
+    const t = (height - HEIGHT_GRASS) / (HEIGHT_ROCK - HEIGHT_GRASS);
+    return lerpColor(colors.grass, colors.hill, t);
+  } else if (height < 35) {
+    const t = (height - HEIGHT_ROCK) / 15;
+    return lerpColor(colors.hill, colors.rock, Math.min(t, 1));
+  } else {
+    const t = (height - 35) / 20;
+    return lerpColor(colors.rock, colors.snow, Math.min(t, 1));
+  }
+}
+
+// Get biome weights for blending
+function getBiomeWeights(
+  height: number,
+  moisture: number,
+  temperature: number,
+): Record<string, number> {
+  const weights: Record<string, number> = {};
+
+  if (height < HEIGHT_WATER) {
+    weights.water = 1;
+    return weights;
+  }
+
+  if (height < HEIGHT_SAND) {
+    const beachWeight =
+      1 - (height - HEIGHT_WATER) / (HEIGHT_SAND - HEIGHT_WATER);
+    weights.beach = beachWeight;
+    const aboveWeight = 1 - beachWeight;
+    if (moisture < 0.3 && temperature > 0.5) {
+      weights.desert = aboveWeight;
+    } else if (moisture > 0.6) {
+      weights.forest = aboveWeight;
+    } else {
+      weights.plains = aboveWeight;
+    }
+    return weights;
+  }
+
+  if (height > 35) {
+    weights.tundra = 1;
+    return weights;
+  }
+
+  if (height > 20) {
+    const mountainWeight = 1 - (height - 20) / 15;
+    const tundraWeight = (height - 20) / 15;
+    weights.mountains = Math.max(0, mountainWeight);
+    weights.tundra = Math.min(1, tundraWeight);
+    return weights;
+  }
+
+  if (height > 8) {
+    const hillBlend = (height - 8) / 12;
+    if (moisture > 0.6) {
+      weights.forest = 1 - hillBlend;
+      weights.hills = hillBlend;
+    } else {
+      weights.hills = hillBlend;
+      if (moisture < 0.3 && temperature > 0.5) {
+        weights.desert = (1 - hillBlend) * 0.5;
+        weights.savanna = (1 - hillBlend) * 0.5;
+      } else if (moisture > 0.4) {
+        weights.plains = 1 - hillBlend;
+      } else {
+        weights.savanna = 1 - hillBlend;
+      }
+    }
+    return weights;
+  }
+
+  if (moisture < 0.3 && temperature > 0.5) {
+    const desertStrength =
+      (((0.3 - moisture) / 0.3) * (temperature - 0.5)) / 0.5;
+    weights.desert = desertStrength;
+    weights.savanna = 1 - desertStrength;
+  } else if (moisture > 0.6) {
+    const forestStrength = (moisture - 0.6) / 0.4;
+    weights.forest = forestStrength;
+    weights.plains = 1 - forestStrength;
+  } else if (moisture > 0.4) {
+    const plainsStrength = (moisture - 0.4) / 0.2;
+    weights.plains = plainsStrength;
+    weights.savanna = 1 - plainsStrength;
+  } else {
+    weights.savanna = 1;
+  }
+
+  return weights;
+}
+
+/**
+ * Get terrain color at a world position (for volumetric terrain vertex coloring)
+ * Uses the same biome blending logic as tile.tsx
+ */
+export function getTerrainColor(
+  worldX: number,
+  worldY: number,
+  worldZ: number,
+): { r: number; g: number; b: number } {
+  // Get the terrain surface height at this XZ position
+  const surfaceHeight = getTerrainHeight(worldX, worldZ);
+
+  // Use the actual Y position for cave coloring, but blend with surface height
+  // This creates a smooth transition where cave interiors use rock colors
+  const effectiveHeight = worldY;
+
+  const moisture = getMoistureValue(worldX, worldZ);
+  const temperature = getTemperatureValue(worldX, worldZ, surfaceHeight);
+  const weights = getBiomeWeights(surfaceHeight, moisture, temperature);
+
+  const finalColor = { r: 0, g: 0, b: 0 };
+
+  for (const [biomeName, weight] of Object.entries(weights)) {
+    if (weight > 0) {
+      const palette = biomeColorPalettes[biomeName] || terrainColors;
+      const biomeColor = getColorForHeight(effectiveHeight, palette);
+      finalColor.r += biomeColor.r * weight;
+      finalColor.g += biomeColor.g * weight;
+      finalColor.b += biomeColor.b * weight;
+    }
+  }
+
+  return finalColor;
 }
 
 export function generateSector(sectorX: number, sectorZ: number): ISector {

@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import * as THREE from "three";
 import { ANIMATION_INDICES } from "../constants";
+import { playerSettings } from "../../constants/settings";
 
 interface GLTFResult {
   animations: THREE.AnimationClip[];
@@ -12,6 +13,7 @@ export function usePlayerAnimation() {
   const [currentAction, setCurrentAction] =
     useState<THREE.AnimationAction | null>(null);
   const actionsRef = useRef<THREE.AnimationAction[]>([]);
+  const lastTimeRef = useRef<number>(performance.now());
 
   const initializeAnimations = useCallback(
     (model: THREE.Group, gltf: GLTFResult): THREE.AnimationMixer => {
@@ -64,20 +66,28 @@ export function usePlayerAnimation() {
     ) => {
       if (!mixer || actionsRef.current.length === 0) return;
 
+      // Calculate delta time for smooth animation
+      const now = performance.now();
+      const delta = (now - lastTimeRef.current) / 1000;
+      lastTimeRef.current = now;
+
       const actions = actionsRef.current;
+
       if (isMoving) {
         if (isRunning) {
           changeAction(actions[2]); // run
-          actions[2].timeScale = isMovingBackward ? -1 : 1;
+          const direction = isMovingBackward ? -1 : 1;
+          actions[2].timeScale = direction * playerSettings.runAnimationSpeed;
         } else {
           changeAction(actions[1]); // walk
-          actions[1].timeScale = isMovingBackward ? -1 : 1;
+          const direction = isMovingBackward ? -1 : 1;
+          actions[1].timeScale = direction * playerSettings.walkAnimationSpeed;
         }
       } else {
         changeAction(actions[0]); // idle
       }
 
-      mixer.update(0.016);
+      mixer.update(delta);
     },
     [mixer, changeAction],
   );

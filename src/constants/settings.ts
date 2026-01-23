@@ -218,11 +218,14 @@ export const cameraSettings = {
 // PLAYER SETTINGS
 // ============================================
 export const playerSettings = {
-  // Movement speeds
-  baseSpeed: 0.022, // Base movement speed (units per frame)
-  runMultiplier: 3, // Speed multiplier when running
-  devSpeedMultiplier: 20, // Speed multiplier in dev mode
-  rotationSpeed: 0.03, // Turning speed (radians per frame)
+  // Movement speeds (calibrated to match animation)
+  baseSpeed: 0.034, // Walk speed - synced with walk animation
+  runMultiplier: 2.0, // Run speed multiplier
+  devSpeedMultiplier: 10, // Speed multiplier in dev mode
+  rotationSpeed: 0.035, // Turning speed (radians per frame)
+  // Animation speed scaling
+  walkAnimationSpeed: 1.0, // Base walk animation speed
+  runAnimationSpeed: 1.0, // Base run animation speed
   // Mouse look
   mouseSensitivity: 0.002, // Mouse look sensitivity
   pitchMin: -0.5, // Minimum pitch (looking up)
@@ -231,6 +234,11 @@ export const playerSettings = {
   height: 1.8, // Player collision height
   width: 0.5, // Player collision width
   mass: 1, // Physics mass
+  // Gravity
+  gravity: 25, // Gravity acceleration (units per second^2)
+  terminalVelocity: 50, // Maximum fall speed
+  groundSnapThreshold: 0.15, // Distance to snap to ground when close
+  groundOffset: 0.02, // Height offset above terrain to prevent feet clipping
 };
 
 // ============================================
@@ -267,6 +275,25 @@ export const hoverIndicatorSettings = {
   heightOffset: 0.05, // Height above terrain surface
   color: "#ff0000", // Indicator color
   opacity: 0.4, // Transparency (0-1)
+};
+
+// ============================================
+// VOLUMETRIC TERRAIN SETTINGS
+// ============================================
+export const volumetricSettings = {
+  chunkSize: 100, // World units per chunk (X and Z) - matches sectorSize
+  chunkHeight: 80, // World units per chunk (Y) - vertical size
+  resolution: 0.5, // Voxels per world unit (0.5 = 50x40x50 grid for 100x80x100 chunk)
+  isoLevel: 0, // Density threshold for surface (0 = where density crosses zero)
+  caveEnabled: true, // Enable cave generation
+  caveThreshold: 0.35, // Cave noise threshold (lower = more caves)
+  caveFrequency: 0.015, // Cave noise frequency (lower = larger caves)
+  minCaveHeight: -30, // Minimum Y for caves (no caves below this)
+  maxCaveHeight: 60, // Maximum Y for caves - high enough to reach mountain surfaces
+  loadDistanceH: 2, // Horizontal chunk load distance
+  loadDistanceV: 1, // Vertical chunk load distance
+  unloadDistanceH: 4, // Horizontal chunk unload distance
+  unloadDistanceV: 2, // Vertical chunk unload distance
 };
 
 // ============================================
