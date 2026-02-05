@@ -84,19 +84,23 @@ export function getDensity(
   // worldY - surfaceHeight: 0 at surface, negative below, positive above
   let density = worldY - surfaceHeight;
 
-  // Apply cave carving if enabled
+  // Apply tunnel carving if enabled
   if (volumetricSettings.caveEnabled || caveConfig?.enabled) {
-    const caveDensity = getCaveDensity(worldX, worldY, worldZ, {
-      enabled: volumetricSettings.caveEnabled,
-      threshold: volumetricSettings.caveThreshold,
-      frequency: volumetricSettings.caveFrequency,
-      minHeight: volumetricSettings.minCaveHeight,
-      maxHeight: volumetricSettings.maxCaveHeight,
-      ...caveConfig,
-    });
+    const tunnelDensity = getCaveDensity(
+      worldX,
+      worldY,
+      worldZ,
+      surfaceHeight,
+      {
+        enabled: volumetricSettings.caveEnabled,
+        minHeight: volumetricSettings.minCaveHeight,
+        maxHeight: volumetricSettings.maxCaveHeight,
+        ...caveConfig,
+      },
+    );
 
     // Carving adds positive values (creates air)
-    density += caveDensity;
+    density += tunnelDensity;
   }
 
   return density;

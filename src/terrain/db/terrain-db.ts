@@ -2,7 +2,7 @@ import { ISector } from "../../types/sector";
 import { IVolumetricChunk } from "../../types/volumetric";
 
 const DB_NAME = "terrain-db";
-const DB_VERSION = 2; // Incremented for volumetric chunks
+const DB_VERSION = 7; // Horizontal through-tunnels
 const SECTOR_STORE_NAME = "sectors";
 const VOLUMETRIC_STORE_NAME = "volumetric-chunks";
 

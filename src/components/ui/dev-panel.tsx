@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { usePlayerContext } from "../../store/player-context";
 import { useCameraStore } from "../../store/camera-store";
 import { useTerrainStore } from "../../store/terrain-store";
 import { useStatsStore } from "../../store/stats-store";
 import { useDevStore } from "../../store/dev-store";
+import { clearAllVolumetricChunks } from "../../terrain/db/terrain-db";
+import { terminateWorkerPool } from "../../terrain/workers/worker-pool";
+import { volumetricSettings } from "../../constants/settings";
 
 // Mini 3D orientation indicator component
 function OrientationIndicator({ rotation }: { rotation: number }) {
@@ -135,12 +138,30 @@ export function DevPanel() {
   const { player } = usePlayerContext();
   const cameraMode = useCameraStore((state) => state.mode);
   const sectors = useTerrainStore((state) => state.sectors);
+  const volumetricChunks = useTerrainStore((state) => state.volumetricChunks);
   const stats = useStatsStore((state) => state.stats);
   const { speedMultiplier } = useDevStore();
 
   const [speed, setSpeed] = useState(0);
+  const [isResetting, setIsResetting] = useState(false);
   const lastPosRef = useRef({ x: 0, y: 0, z: 0 });
   const lastTimeRef = useRef(performance.now());
+
+  // Reset terrain cache and reload
+  const handleResetTerrain = useCallback(async () => {
+    setIsResetting(true);
+    try {
+      // Terminate worker pool
+      terminateWorkerPool();
+      // Clear IndexedDB cache
+      await clearAllVolumetricChunks();
+      // Reload the page to regenerate terrain
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to reset terrain:", error);
+      setIsResetting(false);
+    }
+  }, []);
 
   // Calculate speed from position changes
   useEffect(() => {
@@ -386,6 +407,68 @@ export function DevPanel() {
           <span style={{ color: "#aaa" }}>Camera</span>
           <span>{cameraModeNames[cameraMode]}</span>
         </div>
+      </div>
+
+      {/* Terrain Section */}
+      <div style={{ padding: "10px 12px", borderTop: "1px solid #333" }}>
+        <div
+          style={{
+            color: "#888",
+            fontSize: "10px",
+            marginBottom: "6px",
+            textTransform: "uppercase",
+          }}
+        >
+          Terrain
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "4px",
+          }}
+        >
+          <span style={{ color: "#aaa" }}>Chunks</span>
+          <span style={{ fontFamily: "monospace" }}>
+            {volumetricChunks.size}
+          </span>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "8px",
+          }}
+        >
+          <span style={{ color: "#aaa" }}>Tunnels</span>
+          <span
+            style={{
+              color: volumetricSettings.caveEnabled ? "#4ade80" : "#ef4444",
+              fontWeight: 600,
+            }}
+          >
+            {volumetricSettings.caveEnabled ? "Enabled" : "Disabled"}
+          </span>
+        </div>
+
+        {/* Reset Terrain Button */}
+        <button
+          onClick={handleResetTerrain}
+          disabled={isResetting}
+          style={{
+            width: "100%",
+            padding: "8px 12px",
+            backgroundColor: isResetting ? "#555" : "#dc3545",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+            cursor: isResetting ? "not-allowed" : "pointer",
+            fontSize: "11px",
+            fontWeight: 600,
+          }}
+        >
+          {isResetting ? "Resetting..." : "Reset Terrain Cache"}
+        </button>
       </div>
     </div>
   );
